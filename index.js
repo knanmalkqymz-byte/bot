@@ -1,24 +1,30 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 
-// إعداد عميل البوت مع الصلاحيات المطلوبة
+// إنشاء نسخة البوت مع تفعيل الصلاحيات اللازمة لقراءة الرسائل والمحتوى
 const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent
-    ]
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers
+  ]
 });
 
+// حدث يشتغل أول ما يشتغل البوت ويتصل بريلواي
 client.once('ready', () => {
-    console.log(`تم تسجيل الدخول بنجاح باسم ${client.user.tag}!`);
+  console.log(`تم تسجيل الدخول بنجاح باسم: ${client.user.tag}`);
 });
 
-// أمر تجريبي بسيط للتأكد من استجابة البوت
+// حدث استقبال الرسائل والرد على الأوامر
 client.on('messageCreate', message => {
-    if (message.content === '!ping') {
-        message.reply('Pong!');
-    }
+  // نتأكد إن الرسالة مو من بوت ثاني
+  if (message.author.bot) return;
+  
+  // إذا كتب المستخدم !ping البوت بيرد عليه
+  if (message.content === '!ping') {
+    message.reply('Pong! 🏓 البوت شغال زي الحلاوة');
+  }
 });
 
-// تشغيل البوت باستخدام التوكن المحفوظ في متغيرات ريلواي
+// ربط البوت بالتوكن المخزن في إعدادات ريلواي
 client.login(process.env.TOKEN);
