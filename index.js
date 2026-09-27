@@ -1,6 +1,5 @@
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } = require('discord.js');
 
-// إنشاء نسخة البوت مع تفعيل الصلاحيات اللازمة لقراءة الرسائل والمحتوى
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -10,21 +9,52 @@ const client = new Client({
   ]
 });
 
-// حدث يشتغل أول ما يشتغل البوت ويتصل بريلواي
-client.once('ready', () => {
-  console.log(`تم تسجيل الدخول بنجاح باسم: ${client.user.tag}`);
-});
+// تعريف أوامر السلاش اللي بيشتغل عليها البوت
+const commands = [
+  new SlashCommandBuilder()
+    .setName('ping')
+    .setDescription('يرد عليك البوت ليؤكد أنه شغال'),
+  new SlashCommandBuilder()
+    .setName('gc')
+    .setDescription('أمر خاص بسيرفر GHOST CITY')
+].map(command => command.toJSON());
 
-// حدث استقبال الرسائل والرد على الأوامر
-client.on('messageCreate', message => {
-  // نتأكد إن الرسالة مو من بوت ثاني
-  if (message.author.bot) return;
-  
-  // إذا كتب المستخدم !ping البوت بيرد عليه
-  if (message.content === '!ping') {
-    message.reply('Pong! 🏓 البوت شغال زي الحلاوة');
+client.once('ready', async () => {
+  console.log(`تم تسجيل الدخول بنجاح باسم: ${client.user.tag}`);
+
+  // تسجيل الأوامر تلقائياً في السيرفر أول ما يشتغل البوت
+  const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
+  try {
+    console.log('جاري تسجيل أوامر السلاش...');
+    await rest.put(
+      Routes.applicationCommands(client.user.id),
+      { body: commands },
+    );
+    console.log('تم تسجيل أوامر السلاش بنجاح!');
+  } catch (error) {
+    console.error(error);
   }
 });
 
-// ربط البوت بالتوكن المخزن في إعدادات ريلواي
+// التعامل مع تفاعلات أوامر السلاش (Slash Commands)
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isChatInputCommand()) return;
+
+  const { commandName } = interaction;
+
+  if (commandName === 'ping') {
+    await interaction.reply('Pong! 🏓 البوت شغال زي الحلاوة ومستجيب لأوامر السلاش');
+  } else if (commandName === 'gc') {
+    await interaction.reply('أهلاً بك في GHOST CITY - RP! 🛡️ البوت جاهز لخدمتك.');
+  }
+});
+
+// التعامل مع الرسائل العادية (لو حبيت تكتب !ping)
+client.on('messageCreate', message => {
+  if (message.author.bot) return;
+  if (message.content === '!ping') {
+    message.reply('Pong! 🏓');
+  }
+});
+
 client.login(process.env.TOKEN);
