@@ -1,44 +1,18 @@
-const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } = require('discord.js');
+const { Client, GatewayIntentBits } = require('discord.js');
 
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers
   ]
 });
 
-// الأوامر اللي يبي الموقع والبوت يدمجوها ويسووها في السيرفر
-const commands = [
-  new SlashCommandBuilder()
-    .setName('gc')
-    .setDescription('أمر خاص بـ GHOST CITY')
-].map(command => command.toJSON());
-
-client.once('ready', async () => {
-  console.log(`تم الاتصال بالموقع بنجاح باسم: ${client.user.tag}`);
-
-  const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
-
-  try {
-    // هذا السطر هو اللي يدمج أوامر الموقع مع سيرفرك في ديسكورد فوراً
-    await rest.put(
-      Routes.applicationCommands(client.user.id),
-      { body: commands },
-    );
-    console.log('تم دمج وتثبيت الأوامر بنجاح!');
-  } catch (error) {
-    console.error(error);
-  }
+client.once('ready', () => {
+  console.log(`تم تشغيل البوت بنجاح وأصبح متصلاً باسم: ${client.user.tag}`);
 });
 
-// استجابة البوت للدمج والأوامر
-client.on('interactionCreate', async interaction => {
-  if (!interaction.isChatInputCommand()) return;
-
-  if (interaction.commandName === 'gc') {
-    await interaction.reply('تم دمج الموقع مع البوت بنجاح! 🚀 GHOST CITY جاهز.');
-  }
-});
+// البوت هنا متصل فقط وجاهز ليعمل مع بقية البوتات والخدمات بدون تعارض
 
 client.login(process.env.TOKEN);
