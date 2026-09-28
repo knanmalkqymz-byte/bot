@@ -4,56 +4,40 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMembers
+    GatewayIntentBits.MessageContent
   ]
 });
 
-// تعريف أوامر السلاش اللي بيشتغل عليها البوت
+// الأوامر اللي يبي الموقع والبوت يدمجوها ويسووها في السيرفر
 const commands = [
   new SlashCommandBuilder()
-    .setName('ping')
-    .setDescription('يرد عليك البوت ليؤكد أنه شغال'),
-  new SlashCommandBuilder()
     .setName('gc')
-    .setDescription('أمر خاص بسيرفر GHOST CITY')
+    .setDescription('أمر خاص بـ GHOST CITY')
 ].map(command => command.toJSON());
 
 client.once('ready', async () => {
-  console.log(`تم تسجيل الدخول بنجاح باسم: ${client.user.tag}`);
+  console.log(`تم الاتصال بالموقع بنجاح باسم: ${client.user.tag}`);
 
-  // تسجيل الأوامر تلقائياً في السيرفر أول ما يشتغل البوت
   const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
+
   try {
-    console.log('جاري تسجيل أوامر السلاش...');
+    // هذا السطر هو اللي يدمج أوامر الموقع مع سيرفرك في ديسكورد فوراً
     await rest.put(
       Routes.applicationCommands(client.user.id),
       { body: commands },
     );
-    console.log('تم تسجيل أوامر السلاش بنجاح!');
+    console.log('تم دمج وتثبيت الأوامر بنجاح!');
   } catch (error) {
     console.error(error);
   }
 });
 
-// التعامل مع تفاعلات أوامر السلاش (Slash Commands)
+// استجابة البوت للدمج والأوامر
 client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
 
-  const { commandName } = interaction;
-
-  if (commandName === 'ping') {
-    await interaction.reply('Pong! 🏓 البوت شغال زي الحلاوة ومستجيب لأوامر السلاش');
-  } else if (commandName === 'gc') {
-    await interaction.reply('أهلاً بك في GHOST CITY - RP! 🛡️ البوت جاهز لخدمتك.');
-  }
-});
-
-// التعامل مع الرسائل العادية (لو حبيت تكتب !ping)
-client.on('messageCreate', message => {
-  if (message.author.bot) return;
-  if (message.content === '!ping') {
-    message.reply('Pong! 🏓');
+  if (interaction.commandName === 'gc') {
+    await interaction.reply('تم دمج الموقع مع البوت بنجاح! 🚀 GHOST CITY جاهز.');
   }
 });
 
